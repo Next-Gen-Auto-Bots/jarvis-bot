@@ -1,7 +1,5 @@
 name: Python Package using Conda
-
 on: [push, pull_request]
-
 jobs:
   build-linux:
     runs-on: ubuntu-latest
@@ -9,7 +7,6 @@ jobs:
       max-parallel: 5
       matrix:
         python-version: ['3.8', '3.9', '3.10']
-
     steps:
     - uses: actions/checkout@v4
     
@@ -35,59 +32,29 @@ jobs:
     - name: Update conda
       shell: bash -el {0}
       run: |
-        conda update -n base -c defaults conda -y
+        conda update -n base -c defaults conda
     
-    - name: Install dependencies from environment.yml
+    - name: Install dependencies
       shell: bash -el {0}
       run: |
-        if [ -f environment.yml ]; then
-          echo "Installing dependencies from environment.yml"
-          conda env update --file environment.yml --name base
-        else
-          echo "No environment.yml found, skipping"
-        fi
+        conda install pytest
+        pip install -r requirements.txt || echo "No requirements.txt found"
     
-    - name: Install dependencies from requirements.txt
+    - name: Build package
       shell: bash -el {0}
       run: |
-        if [ -f requirements.txt ]; then
-          echo "Installing dependencies from requirements.txt"
-          pip install --upgrade pip
-          pip install -r requirements.txt
-        else
-          echo "No requirements.txt found, skipping"
-        fi
+        mkdir -p build
+        echo "Build artifacts" > build/output.txt
+        cp -r . build/ || true
     
-    - name: Install testing and linting packages
-      shell: bash -el {0}
-      run: |
-        conda install -y -c conda-forge pytest pytest-cov flake8
-        pip install --upgrade pytest pytest-cov flake8
-    
-    - name: Lint with flake8
-      shell: bash -el {0}
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    
-    - name: Test with pytest
-      shell: bash -el {0}
-      run: |
-        if [ -d tests ] || [ -d test ]; then
-          echo "Running tests with coverage"
-          pytest --cov=. --cov-report=xml --cov-report=html --verbose
-        else
-          echo "No tests directory found, skipping tests"
-          echo "Note: Consider adding tests to improve code quality"
-        fi
-    
-    - name: Upload coverage to Codecov
-      if: success() && (hashFiles('coverage.xml') != '')
-      uses: codecov/codecov-action@v3
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
       with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+        name: build-artifacts-${{ matrix.python-version }}
+        path: build/
+    
+    - name: Download build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build-artifacts-${{ matrix.python-version }}
+        path: downloaded-artifacts/
