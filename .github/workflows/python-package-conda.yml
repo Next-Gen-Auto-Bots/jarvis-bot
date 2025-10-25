@@ -37,15 +37,7 @@ jobs:
       run: |
         if [ ! -f environment.yml ]; then
           echo "Creating basic environment.yml"
-          cat > environment.yml << 'EOF'
-name: test-env
-channels:
-  - conda-forge
-  - defaults
-dependencies:
-  - python=${{ matrix.python-version }}
-  - pip
-EOF
+          printf 'name: test-env\nchannels:\n  - conda-forge\n  - defaults\ndependencies:\n  - python=%s\n  - pip\n' '${{ matrix.python-version }}' > environment.yml
         fi
         echo "Environment file contents:"
         cat environment.yml
@@ -78,9 +70,7 @@ EOF
       shell: bash -el {0}
       run: |
         echo "Running flake8 linting..."
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.git,__pycache__,.pytest_cache,.venv,venv,build,dist
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=.git,__pycache__,.pytest_cache,.venv,venv,build,dist
     
     - name: Test with pytest
@@ -92,21 +82,7 @@ EOF
         else
           echo "No tests directory found, creating sample test structure"
           mkdir -p tests
-          cat > tests/test_sample.py << 'EOF'
-import pytest
-
-def test_sample():
-    """Sample test to ensure pytest is working"""
-    assert True
-
-def test_addition():
-    """Test basic arithmetic"""
-    assert 1 + 1 == 2
-
-def test_string_concatenation():
-    """Test string operations"""
-    assert "Hello" + " " + "World" == "Hello World"
-EOF
+          printf '%s\n' 'import pytest' '' 'def test_sample():' '    """Sample test to ensure pytest is working"""' '    assert True' '' 'def test_addition():' '    """Test basic arithmetic"""' '    assert 1 + 1 == 2' '' 'def test_string_concatenation():' '    """Test string operations"""' "    assert 'Hello' + ' ' + 'World' == 'Hello World'" > tests/test_sample.py
           echo "Running sample tests with coverage"
           pytest tests/ --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --verbose
         fi
