@@ -20,10 +20,20 @@ A modular, production-ready Telegram bot for sending SMS and voice calls with im
 - **Clean Dependencies**: Streamlined `requirements.txt` with essential packages only
 - **Python Telegram Bot**: Using latest stable version for reliable bot operations
 
+### SMS Functionality Upgrade 📱
+- **Multi-Provider Support**: Integrated both Textbelt and Twilio SMS providers
+- **Provider Selection**: Choose your preferred SMS provider via command-line flag
+- **Enhanced Error Handling**: Comprehensive error messages and fallback suggestions
+- **Detailed Status Messages**: Real-time feedback with provider-specific information
+- **Flexible Configuration**: Easy provider switching with `--provider` flag
+
 ## 🚀 Features
 
 - **`/start`** — Welcome message with bot introduction
-- **`/sms <phone> <message>`** — Send SMS via Textbelt (self-hosted or API)
+- **`/sms <phone_number> <message> [--provider textbelt|twilio]`** — Send SMS via multiple providers (Textbelt or Twilio)
+  - Example: `/sms +1234567890 Hello World`
+  - Example: `/sms +1234567890 Hello World --provider twilio`
+  - Example: `/sms +1234567890 Hello World --provider textbelt`
 - **`/call <number>`** — Placeholder for future voice call integration
 - **Modular Design** — Easy to extend with new commands and handlers
 - **Error Recovery** — Graceful handling of API failures and network issues
@@ -42,175 +52,141 @@ cd jarvis-bot
 pip install -r requirements.txt
 ```
 
-Required packages:
-- `python-telegram-bot` - Telegram Bot API wrapper
-- `requests` - HTTP library for API calls
-- `python-dotenv` - Environment variable management
-
 ### 3. Configure Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory with the following variables:
 
 ```env
-# Telegram Bot Configuration
-BOT_TOKEN=your_telegram_bot_token_here
+# Telegram Bot Token (Required)
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here
 
-# Textbelt Configuration
-TEXTBELT_API_KEY=textbelt  # Use 'textbelt' for demo (1 SMS/day) or your paid key
-TEXTBELT_URL=https://textbelt.com/text  # Or your self-hosted URL
+# SMS Provider Configuration
+
+# Textbelt (Optional - defaults to demo key)
+TEXTBELT_KEY=your_textbelt_api_key  # Use 'textbelt' for testing (limited quota)
+
+# Twilio (Optional - required for Twilio SMS)
+TWILIO_ACCOUNT_SID=your_twilio_account_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number  # E.g., +1234567890
 ```
 
-**How to get your Bot Token:**
-1. Message [@BotFather](https://t.me/botfather) on Telegram
-2. Send `/newbot` and follow the prompts
-3. Copy the API token provided
-4. Paste it into your `.env` file
+**Note**: You can use either Textbelt or Twilio, or configure both for flexibility.
 
-### 4. Set up Self-Hosted Textbelt Server (Recommended for Unlimited SMS)
+### 4. Run the Bot
+```bash
+python main.py
+```
 
-For unlimited SMS without API key restrictions, self-host the open-source Textbelt server:
+## 🔧 Configuration Details
 
-**Why Self-Host?**
-- ✅ **Unlimited SMS** - No rate limits or quotas
-- ✅ **No API key required** - Direct access to your own server
-- ✅ **Free and open-source** - Complete control over your messaging infrastructure
-- ✅ **Production-ready** - Reliable infrastructure for scaling
+### SMS Providers
 
-**Quick Setup:**
+#### Textbelt (Default)
+- **Free tier available** with limited quota
+- No signup required for testing
+- Set `TEXTBELT_KEY=textbelt` for demo mode
+- Obtain API key from [textbelt.com](https://textbelt.com) for production use
+
+#### Twilio
+- **Enterprise-grade** SMS delivery
+- Requires Twilio account signup
+- Configure `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and `TWILIO_PHONE_NUMBER`
+- Get credentials from [Twilio Console](https://console.twilio.com)
+
+### Provider Selection
+
+By default, the bot uses **Textbelt** as the SMS provider. You can specify a different provider using the `--provider` flag:
 
 ```bash
-# Clone Textbelt repository
-git clone https://github.com/typpo/textbelt.git
-cd textbelt
+# Use Textbelt (default)
+/sms +1234567890 Hello World
 
-# Install dependencies
-npm install
+# Explicitly use Textbelt
+/sms +1234567890 Hello World --provider textbelt
 
-# Configure your SMS provider (Twilio, Nexmo, etc.)
-# Edit lib/config.js with your provider credentials
-
-# Start the server
-node server.js
+# Use Twilio
+/sms +1234567890 Hello World --provider twilio
 ```
 
-Then update your `.env` file:
-```env
-TEXTBELT_URL=http://localhost:9090/text  # Or your server URL
-TEXTBELT_API_KEY=textbelt
-```
-
-### 5. Run the Bot
-
-```bash
-python bot/main.py
-```
-
-You should see:
-```
-Bot started successfully!
-```
-
-## 📱 Usage
-
-Once your bot is running:
-
-1. **Start a chat** with your bot on Telegram
-2. Send **`/start`** to see the welcome message
-3. Send **`/sms <phone> <message>`** to send an SMS
-
-**Example:**
-```
-/sms +1234567890 Hello from Jarvis Bot!
-```
-
-## 📊 SMS Options Comparison
-
-| Option | Cost | Limit | API Key Required |
-|--------|------|-------|------------------|
-| **Self-Hosted Textbelt** | Free (+ SMS provider costs) | Unlimited | ❌ No |
-| Textbelt Demo (textbelt.com) | Free | 1 SMS/day | ✅ Yes (`textbelt`) |
-| Textbelt Paid (textbelt.com) | $0.09/SMS | Pay-as-you-go | ✅ Yes (paid key) |
-
-## 💡 Recommendations
-
-- **For Development/Testing:** Use the self-hosted Textbelt server with a free-tier SMS provider
-- **For Production:** Deploy self-hosted Textbelt on a VPS with your preferred SMS gateway (Twilio, etc.)
-- **For Quick Testing:** Use the public demo key (limited to 1 SMS per day per number)
-
-## 🐛 Troubleshooting
-
-### SMS not sending?
-- Verify your `TEXTBELT_URL` is correct and the server is running
-- Check that your `.env` file is properly configured
-- Review bot logs for error messages
-
-### Self-hosted server not working?
-- Ensure your SMS gateway credentials are properly configured in Textbelt
-- Check that port 9090 (or your custom port) is accessible
-- Verify your SMS provider account has sufficient credits
-
-### Rate limit errors?
-- Switch from public API to self-hosted solution
-- If using self-hosted, check your SMS provider's rate limits
-
-### Bot not responding?
-- Verify your `BOT_TOKEN` is correct in `.env`
-- Check your internet connection
-- Ensure the bot is running without errors
-
-## 🔮 Future Enhancements
-
-- 📞 Voice call integration via Fonoster API
-- 📧 Email notification support
-- 🌐 Multi-language support
-- 📊 Usage analytics and reporting
-- 🔔 Scheduled messaging capabilities
-- 🔐 User authentication and authorization
-- 📝 Message templates and bulk sending
-
-## 📚 Resources
-
-- [Textbelt Self-Hosted Server](https://github.com/typpo/textbelt) - Open-source SMS server
-- [Textbelt Documentation](https://textbelt.com) - Public API documentation
-- [Telegram Bot API](https://core.telegram.org/bots/api) - Bot development guide
-- [python-telegram-bot Documentation](https://docs.python-telegram-bot.org/) - Library documentation
-- [python-dotenv](https://pypi.org/project/python-dotenv/) - Environment variable management
-
-## 🏗️ Project Structure
+## 📚 Project Structure
 
 ```
 jarvis-bot/
+├── main.py                 # Bot entry point
 ├── bot/
-│   ├── handlers/          # Command handlers (modular organization)
-│   ├── __init__.py        # Package initialization
-│   ├── config.py          # Configuration management
-│   └── main.py            # Main bot application (refactored)
-├── .env                   # Environment variables (create this)
-├── .github/
-│   └── workflows/         # CI/CD workflows
-├── LICENSE                # MIT License
-├── README.md              # This file
-├── SECURITY.md            # Security policy
-└── requirements.txt       # Python dependencies
+│   ├── __init__.py
+│   ├── config.py           # Configuration management
+│   └── handlers/
+│       ├── __init__.py
+│       ├── start.py        # /start command handler
+│       ├── sms.py          # /sms command handler (multi-provider)
+│       └── call.py         # /call command handler
+├── requirements.txt        # Python dependencies
+├── .env.example           # Example environment configuration
+└── README.md              # This file
 ```
+
+## 🛠️ Usage Examples
+
+### Basic SMS (Default Provider)
+```bash
+/sms +1234567890 Hello from Jarvis!
+```
+
+### SMS with Twilio Provider
+```bash
+/sms +1234567890 This message is sent via Twilio --provider twilio
+```
+
+### SMS with Textbelt Provider
+```bash
+/sms +1234567890 This message is sent via Textbelt --provider textbelt
+```
+
+## 🔐 Security Best Practices
+
+1. **Never commit `.env` file** to version control
+2. Use **strong API keys** and rotate them regularly
+3. **Restrict bot access** to authorized users only
+4. **Monitor API usage** to detect unusual activity
+5. **Use environment variables** for all sensitive data
+
+## 🐛 Troubleshooting
+
+### SMS Not Sending
+
+1. **Check API credentials** in `.env` file
+2. **Verify phone number format** (must include country code with `+`)
+3. **Check API quota/limits** for your provider
+4. **Review bot logs** for detailed error messages
+5. **Try alternative provider** using `--provider` flag
+
+### Textbelt Issues
+- Ensure `TEXTBELT_KEY` is set correctly
+- Free tier has limited quota (10 messages)
+- Consider upgrading to paid plan for production use
+
+### Twilio Issues
+- Verify all three Twilio credentials are set
+- Ensure `TWILIO_PHONE_NUMBER` is a valid Twilio number
+- Check Twilio account balance and status
+- Review Twilio Console for delivery logs
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) file for details
+This project is open source and available under the MIT License.
 
-## 👤 Author
+## 🙏 Acknowledgments
 
-**Next-Gen-Auto-Bots**
-- GitHub: [@Next-Gen-Auto-Bots](https://github.com/Next-Gen-Auto-Bots)
+- [python-telegram-bot](https://github.com/python-telegram-bot/python-telegram-bot) — Telegram Bot API wrapper
+- [Textbelt](https://textbelt.com) — Free SMS API service
+- [Twilio](https://www.twilio.com) — Enterprise SMS API service
 
-## ⭐ Show Your Support
+## 📞 Support
 
-Give a ⭐️ if this project helped you!
-
----
-
-**Note:** This bot is for educational and legitimate communication purposes only. Always comply with local telecommunications laws and regulations when sending SMS messages.
+For issues, questions, or suggestions, please open an issue on GitHub.
