@@ -1,8 +1,12 @@
 name: Deploy to Production
-
 on:
   workflow_dispatch:
-
+permissions:
+  contents: read
+  issues: none
+  pull-requests: none
+  id-token: none
+  deployments: none
 jobs:
   deploy:
     runs-on: ubuntu-latest
