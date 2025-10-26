@@ -6,6 +6,12 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+permissions:
+  contents: read
+  issues: none
+  pull-requests: none
+  id-token: none
+  deployments: none
 jobs:
   build:
     runs-on: ubuntu-latest
