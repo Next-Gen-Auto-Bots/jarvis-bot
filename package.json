@@ -1,0 +1,28 @@
+{
+  "name": "next-gen-auto-bots",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Next Generation Auto Bots Website",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "keywords": [
+    "astro",
+    "bots",
+    "automation",
+    "next-gen"
+  ],
+  "author": "tabrezahmed51",
+  "license": "MIT",
+  "dependencies": {
+    "astro": "^4.0.0"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.3.1",
+    "typescript": "^5.0.0"
+  }
+}
