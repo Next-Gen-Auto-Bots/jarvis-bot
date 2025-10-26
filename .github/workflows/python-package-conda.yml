@@ -2,6 +2,13 @@ name: Python Package using Conda
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+  issues: none
+  pull-requests: none
+  id-token: none
+  deployments: none
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
@@ -35,72 +42,26 @@ jobs:
     - name: Create conda environment if needed
       shell: bash -el {0}
       run: |
-        if [ ! -f environment.yml ]; then
-          echo "Creating basic environment.yml"
-          printf 'name: test-env\nchannels:\n  - conda-forge\n  - defaults\ndependencies:\n  - python=%s\n  - pip\n' '${{ matrix.python-version }}' > environment.yml
-        fi
-        echo "Environment file contents:"
-        cat environment.yml
+        conda create -n test-env python=${{ matrix.python-version }} -y
     
-    - name: Update conda environment
+    - name: Install dependencies
       shell: bash -el {0}
       run: |
-        conda env update --file environment.yml --name test-env
         conda activate test-env
-    
-    - name: Install dependencies from requirements.txt
-      shell: bash -el {0}
-      run: |
-        if [ -f requirements.txt ]; then
-          echo "Installing dependencies from requirements.txt"
-          pip install --upgrade pip
-          pip install -r requirements.txt
-        else
-          echo "No requirements.txt found, skipping"
-        fi
-    
-    - name: Install testing and linting packages
-      shell: bash -el {0}
-      run: |
-        pip install --upgrade flake8 pytest pytest-cov pytest-xdist coverage
-        echo "Installed testing packages:"
-        pip list | grep -E '(flake8|pytest|coverage)'
+        conda install -c conda-forge pytest flake8 -y
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     
     - name: Lint with flake8
       shell: bash -el {0}
       run: |
-        echo "Running flake8 linting..."
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.git,__pycache__,.pytest_cache,.venv,venv,build,dist
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=.git,__pycache__,.pytest_cache,.venv,venv,build,dist
+        conda activate test-env
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     
     - name: Test with pytest
       shell: bash -el {0}
       run: |
-        if [ -d tests ] || [ -d test ]; then
-          echo "Running tests with coverage"
-          pytest --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --verbose
-        else
-          echo "No tests directory found, creating sample test structure"
-          mkdir -p tests
-          printf '%s\n' 'import pytest' '' 'def test_sample():' '    """Sample test to ensure pytest is working"""' '    assert True' '' 'def test_addition():' '    """Test basic arithmetic"""' '    assert 1 + 1 == 2' '' 'def test_string_concatenation():' '    """Test string operations"""' "    assert 'Hello' + ' ' + 'World' == 'Hello World'" > tests/test_sample.py
-          echo "Running sample tests with coverage"
-          pytest tests/ --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing --verbose
-        fi
-    
-    - name: Upload coverage to Codecov
-      if: success() && hashFiles('coverage.xml') != ''
-      uses: codecov/codecov-action@v4
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella-${{ matrix.python-version }}
-        fail_ci_if_error: false
-        token: ${{ secrets.CODECOV_TOKEN }}
-    
-    - name: Upload coverage artifacts
-      if: always() && hashFiles('htmlcov/**') != ''
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report-${{ matrix.python-version }}
-        path: htmlcov/
-        retention-days: 30
+        conda activate test-env
+        pytest
