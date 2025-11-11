@@ -40,6 +40,20 @@ Jarvis Bot now harnesses the full power of decentralized networks to deliver ult
 
 **This isn't just privacy—this is digital sovereignty. Your communications, your rules, your network.**
 
+## 💰 Cost & Billing Transparency
+
+**Jarvis Bot is 100% FREE and open-source (MIT License).** There are NO charges from the bot itself.
+
+However, some **optional features** use third-party services that may charge fees:
+- **Telegram:** FREE (required for core functionality)
+- **SMS (Textbelt):** Free tier available, paid plans ~$10 for 200 messages (optional)
+- **SMS/Calls (Twilio):** Pay-as-you-go pricing, ~$0.0075 per SMS (optional)
+- **AI (OpenAI/DeepSeek):** Pay-per-use, only if you configure them (optional)
+
+**You control all costs.** The bot only uses services YOU configure with YOUR API keys. See [BILLING.md](BILLING.md) for complete cost transparency and how to avoid unexpected charges.
+
+**Important:** If you see GitHub billing notifications, those are from GitHub services (Actions, storage, etc.), not Jarvis Bot. See [FAQ.md](FAQ.md#q-why-am-i-seeing-a-github-billing-message) for details.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -147,6 +161,14 @@ We welcome secure-by-default contributions. Please:
 - Add tests and update docs
 - Follow conventional commits
 - Ensure CI, security, and policy checks pass
+
+## 📚 Documentation
+
+- **[README.md](README.md)** - You are here! Project overview and quick start
+- **[BILLING.md](BILLING.md)** - Complete cost transparency and billing information
+- **[FAQ.md](FAQ.md)** - Frequently asked questions about setup, usage, billing, and security
+- **[SECURITY.md](SECURITY.md)** - Security policy, best practices, and vulnerability reporting
+- **[LICENSE](LICENSE)** - MIT License full text
 
 ## 🆘 Support
 
