@@ -1,11 +1,8 @@
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 import json
 import os
-
-# Initialize translator
-translator = Translator()
 
 # User language preferences storage (in production, use a database)
 USER_LANGUAGES = {}
@@ -39,8 +36,8 @@ def translate_text(text: str, target_lang: str) -> str:
     if target_lang == 'en':
         return text
     try:
-        translation = translator.translate(text, dest=target_lang)
-        return translation.text
+        translator = GoogleTranslator(source='auto', target=target_lang)
+        return translator.translate(text)
     except BaseException:
         return text  # Return original text if translation fails
 
