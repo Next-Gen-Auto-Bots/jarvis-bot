@@ -16,7 +16,7 @@ TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 
 class TwilioCallHandler:
     """Handler for Twilio voice call operations."""
-    
+
     def __init__(self):
         """Initialize Twilio client with credentials."""
         self.client = None
@@ -28,14 +28,14 @@ class TwilioCallHandler:
                 logger.error(f"Failed to initialize Twilio client: {e}")
         else:
             logger.warning("Twilio credentials not configured")
-    
+
     def make_call(self, to_number: str, message: str = None) -> dict:
         """Make an outgoing voice call using Twilio.
-        
+
         Args:
             to_number: The phone number to call (E.164 format: +1234567890)
             message: Optional custom message to play during call
-            
+
         Returns:
             dict: Call status information including call_sid, status, and error if any
         """
@@ -44,9 +44,8 @@ class TwilioCallHandler:
                 'success': False,
                 'error': 'Twilio client not initialized. Please configure TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN.',
                 'call_sid': None,
-                'status': 'failed'
-            }
-        
+                'status': 'failed'}
+
         if not TWILIO_PHONE_NUMBER:
             return {
                 'success': False,
@@ -54,21 +53,21 @@ class TwilioCallHandler:
                 'call_sid': None,
                 'status': 'failed'
             }
-        
+
         # Default TwiML message
         default_message = "Hello! This is a test call from Jarvis Bot. Thank you for using our service."
         twiml_message = message or default_message
-        
+
         # Create TwiML response
         twiml = f'<Response><Say voice="alice">{twiml_message}</Say></Response>'
-        
+
         try:
             call = self.client.calls.create(
                 to=to_number,
                 from_=TWILIO_PHONE_NUMBER,
                 twiml=twiml
             )
-            
+
             logger.info(f"Call initiated successfully. SID: {call.sid}")
             return {
                 'success': True,
@@ -78,7 +77,7 @@ class TwilioCallHandler:
                 'from': TWILIO_PHONE_NUMBER,
                 'error': None
             }
-            
+
         except TwilioRestException as e:
             logger.error(f"Twilio API error: {e.msg} (Code: {e.code})")
             return {
@@ -104,11 +103,11 @@ twilio_handler = TwilioCallHandler()
 
 async def call(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle the /call command with Twilio voice call integration.
-    
+
     Usage:
         /call +1234567890
         /call +1234567890 Custom message to play during the call
-    
+
     Args:
         update: Incoming update from Telegram.
         context: Context object for the callback.
@@ -125,11 +124,12 @@ async def call(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             parse_mode='Markdown'
         )
         return
-    
+
     # Extract phone number and optional message
     to_number = context.args[0]
-    custom_message = ' '.join(context.args[1:]) if len(context.args) > 1 else None
-    
+    custom_message = ' '.join(context.args[1:]) if len(
+        context.args) > 1 else None
+
     # Validate phone number format (basic validation)
     if not to_number.startswith('+'):
         await update.message.reply_text(
@@ -140,7 +140,7 @@ async def call(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             parse_mode='Markdown'
         )
         return
-    
+
     # Inform user that call is being initiated
     status_message = await update.message.reply_text(
         "📞 *Initiating Call...*\n\n"
@@ -148,10 +148,10 @@ async def call(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"*Message:* {custom_message or 'Default greeting'}",
         parse_mode='Markdown'
     )
-    
+
     # Make the call
     result = twilio_handler.make_call(to_number, custom_message)
-    
+
     # Send response based on result
     if result['success']:
         await status_message.edit_text(
@@ -163,12 +163,14 @@ async def call(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "The recipient should receive the call shortly.",
             parse_mode='Markdown'
         )
-        logger.info(f"User {update.effective_user.id} initiated call to {to_number}")
+        logger.info(
+            f"User {
+                update.effective_user.id} initiated call to {to_number}")
     else:
         error_details = f"*Error:* {result['error']}\n"
         if 'error_code' in result:
             error_details += f"*Error Code:* {result['error_code']}\n"
-        
+
         await status_message.edit_text(
             "❌ *Call Failed*\n\n"
             f"{error_details}\n"
@@ -179,4 +181,7 @@ async def call(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "• Verify destination number is valid",
             parse_mode='Markdown'
         )
-        logger.error(f"Call failed for user {update.effective_user.id}: {result['error']}")
+        logger.error(
+            f"Call failed for user {
+                update.effective_user.id}: {
+                result['error']}")
