@@ -161,6 +161,20 @@ Security isn't a feature—it's the architecture:
 
 ---
 
+## 💰 Cost & Billing Transparency
+
+**Jarvis Bot is 100% FREE and open-source (MIT License).** There are NO charges from the bot itself.
+
+However, some **optional features** use third-party services that may charge fees:
+- **Telegram:** FREE (required for core functionality)
+- **SMS (Textbelt):** Free tier available, paid plans ~$10 for 200 messages (optional)
+- **SMS/Calls (Twilio):** Pay-as-you-go pricing, ~$0.0075 per SMS (optional)
+- **AI (OpenAI/DeepSeek):** Pay-per-use, only if you configure them (optional)
+
+**You control all costs.** The bot only uses services YOU configure with YOUR API keys. See [BILLING.md](BILLING.md) for complete cost transparency and how to avoid unexpected charges.
+
+**Important:** If you see GitHub billing notifications, those are from GitHub services (Actions, storage, etc.), not Jarvis Bot. See [FAQ.md](FAQ.md#q-why-am-i-seeing-a-github-billing-message) for details.
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -773,6 +787,15 @@ If you find this project useful, please consider giving it a ⭐ on GitHub!
 
 ---
 
+## 📚 Documentation
+
+- **[README.md](README.md)** - You are here! Project overview and quick start
+- **[BILLING.md](BILLING.md)** - Complete cost transparency and billing information
+- **[FAQ.md](FAQ.md)** - Frequently asked questions about setup, usage, billing, and security
+- **[SECURITY.md](SECURITY.md)** - Security policy, best practices, and vulnerability reporting
+- **[LICENSE](LICENSE)** - MIT License full text
+
+## 🆘 Support
 <div align="center">
 
 **Built with ❤️ by Next-Gen Auto Bots**
